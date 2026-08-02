@@ -30,4 +30,29 @@ interface puf_core_if #(
         input  rst_n, start, challenge, busy, ready, response, debug_count_a, debug_count_b;
     endclocking
 
+    modport dut_mp (
+        input  clk27,
+        input  rst_n,
+        input  start,
+        input  challenge,
+
+        output busy,
+        output ready,
+        output response,
+        output debug_count_a,
+        output debug_count_b
+    );
+
+    modport drv_mp (
+        clocking drv_cb,
+        input    clk27,
+        output   rst_n
+    );
+
+    modport mon_mp (
+        clocking mon_cb,
+        input    clk27,
+        input    rst_n
+    );
+
 endinterface
