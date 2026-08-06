@@ -1,3 +1,6 @@
+timeunit 1ns;
+timeprecision 1ps;
+
 interface puf_core_if #(
     parameter int unsigned CHALLENGE_WIDTH = 32,
     parameter int unsigned RESPONSE_BITS   = 16,
@@ -53,6 +56,20 @@ interface puf_core_if #(
         clocking mon_cb,
         input    clk27,
         input    rst_n
+    );
+
+    modport checker_mp (
+        clocking mon_cb,
+        input clk27,
+        input rst_n,
+        input start,
+        input challenge,
+
+        input busy,
+        input ready,
+        input response,
+        input debug_count_a,
+        input debug_count_b
     );
 
 endinterface

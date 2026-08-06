@@ -1,3 +1,6 @@
+timeunit 1ns;
+timeprecision 1ps;
+
 module puf_core_if_clocking_tb;
 
     localparam int TEST_CHALLENGE_WIDTH = 10;
