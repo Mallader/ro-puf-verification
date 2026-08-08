@@ -24,37 +24,39 @@ module puf_checker_probe (
     task automatic check_normal_protocol();
         typedef enum {
             WAIT_START,
-            EXPECT_BUSY,
-            EXPECT_READY
+            WAIT_BUSY,
+            WAIT_READY
         } checker_state_e;
 
-        checker_state_e state;
+        checker_state_e state = WAIT_START;
         forever begin
-            @(posedge vif.clk27);
-            if (vif.mon_cb.rst_n !== 1'b1) begin
+            @(posedge vif.clk27 or negedge vif.rst_n);
+            if (vif.rst_n !== 1'b1) begin
                 state = WAIT_START;
             end
             else begin
                 case (state)
                     WAIT_START: begin
-                        if (vif.start === 1'b1 || vif.busy === 1'b0)
-                            state = EXPECT_BUSY;
+                        if (vif.mon_cb.start === 1'b1 && vif.mon_cb.busy === 1'b0)
+                            state = WAIT_BUSY;
                     end
 
-                    EXPECT_BUSY: begin
-                        if (vif.busy !== 1'b1 || vif.ready !== 1'b0) begin
-                            $fatal(1, "[%0t] EXPECT_BUSY: busy=%b, expected 1, ready=%b, expected 0",
-                            $time, vif.busy, vif.ready);
+                    WAIT_BUSY: begin
+                        if (vif.mon_cb.busy === 1'b1) begin
+                            if (vif.mon_cb.ready !== 1'b0)
+                                $fatal(1, "[%0t] WAIT_BUSY: busy=%b, expected 1, ready=%b, expected 0",
+                                $time, vif.mon_cb.busy, vif.mon_cb.ready);
+                            state = WAIT_READY;
                         end
-                        state = EXPECT_READY;
                     end
 
-                    EXPECT_READY: begin
-                        if (vif.busy !== 1'b0 || vif.ready !== 1'b1 || vif.response === '0 || vif.debug_count_a === '0 || vif.debug_count_b === '0) begin
-                            $fatal(1, "[%0t] EXPECT_READY: busy=%b, expected 0, ready=%b, expected 1, responce =%b, debug_count_a =%b, debug_count_b = %b",
-                            $time, vif.busy, vif.ready, vif.response, vif.debug_count_a, vif.debug_count_b);
+                    WAIT_READY: begin
+                        if (vif.mon_cb.ready  === 1'b1) begin
+                            if (vif.mon_cb.busy !== 1'b0 || vif.mon_cb.response === '0 || vif.mon_cb.debug_count_a === '0 || vif.mon_cb.debug_count_b === '0)
+                                $fatal(1, "[%0t] WAIT_READY: busy=%b, expected 0, ready=%b, expected 1, responce =%b, debug_count_a =%b, debug_count_b = %b",
+                                $time, vif.mon_cb.busy, vif.mon_cb.ready, vif.mon_cb.response, vif.mon_cb.debug_count_a, vif.mon_cb.debug_count_b);
+                            state = WAIT_START;
                         end
-                        state = WAIT_START;
                     end
 
                     default: 
