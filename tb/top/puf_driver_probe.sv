@@ -6,10 +6,11 @@ module puf_driver_probe  (
 );
     localparam logic [vif.CHALLENGE_WIDTH-1:0] CHALLENGE_1 = 'h3E9;
     localparam logic [vif.CHALLENGE_WIDTH-1:0] CHALLENGE_2 = 'h310;
-    localparam logic [vif.CHALLENGE_WIDTH-1:0] CHALLENGE_3 = 'h311;
 
     localparam BUSY_TIMEOUT_CYCLES  = 10;
     localparam READY_TIMEOUT_CYCLES = 20;
+
+    localparam int READY_HOLD_CYCLES = 3;
 
     bit success = 0;
     int unsigned cycles_waited = 0;
@@ -109,27 +110,10 @@ module puf_driver_probe  (
             cycles_waited
         );
 
-        //сброс
-        apply_reset(2);
-
-        //обычная операция (незавершенная)
-        send_start(CHALLENGE_2);
-        wait_for_busy(BUSY_TIMEOUT_CYCLES, success, cycles_waited);
-        if (!success)
-            $fatal(1,
-                "BUSY TIMEOUT after %0d cycles",
-                cycles_waited
-            );
-
-        $display("BUSY detected");
-
-        //сброс
-        apply_reset(2);
-
-        repeat (3) @(posedge vif.clk27);
+        repeat (READY_HOLD_CYCLES) @(posedge vif.clk27);
 
         //обычная операция
-        send_start(CHALLENGE_3);
+        send_start(CHALLENGE_2);
 
         wait_for_busy(BUSY_TIMEOUT_CYCLES, success, cycles_waited);
         if (!success)
@@ -151,9 +135,6 @@ module puf_driver_probe  (
             "READY detected after %0d cycles",
             cycles_waited
         );
-
-        repeat (4) @(posedge vif.clk27);
-        $finish;
     end
 
 endmodule

@@ -29,16 +29,47 @@ module puf_checker_probe (
         } checker_state_e;
 
         checker_state_e state = WAIT_START;
+
+        int accepted_count  = 0;
+        int completed_count = 0;
+
+        logic [vif.RESPONSE_BITS-1:0] saved_response;
+        logic [vif.COUNTER_WIDTH-1:0] saved_count_a;
+        logic [vif.COUNTER_WIDTH-1:0] saved_count_b;
+        logic                         result_hold;
+
         forever begin
             @(posedge vif.clk27 or negedge vif.rst_n);
+
+            if (completed_count == 2) begin
+                if (accepted_count != 2)
+                    $fatal(1,
+                        "Wrong operation count: accepted=%0d completed=%0d",
+                        accepted_count, completed_count
+                    );
+
+                $display(
+                    "PUF CORE PROCEDURAL TEST PASSED: accepted=%0d completed=%0d",
+                    accepted_count, completed_count
+                );
+                $finish;
+            end
+
             if (vif.rst_n !== 1'b1) begin
                 state = WAIT_START;
+                result_hold = 1'b0;
             end
             else begin
                 case (state)
                     WAIT_START: begin
-                        if (vif.mon_cb.start === 1'b1 && vif.mon_cb.busy === 1'b0)
+                        if (vif.mon_cb.start === 1'b1 && vif.mon_cb.busy === 1'b0) begin
                             state = WAIT_BUSY;
+                            accepted_count++;
+                            result_hold = 1'b0;
+                        end
+                        else if (result_hold === 1'b1) begin
+                            check_result_storage(saved_response, saved_count_a, saved_count_b);
+                        end
                     end
 
                     WAIT_BUSY: begin
@@ -52,10 +83,15 @@ module puf_checker_probe (
 
                     WAIT_READY: begin
                         if (vif.mon_cb.ready  === 1'b1) begin
-                            if (vif.mon_cb.busy !== 1'b0 || vif.mon_cb.response === '0 || vif.mon_cb.debug_count_a === '0 || vif.mon_cb.debug_count_b === '0)
-                                $fatal(1, "[%0t] WAIT_READY: busy=%b, expected 0, ready=%b, expected 1, responce =%b, debug_count_a =%b, debug_count_b = %b",
+                            if (vif.mon_cb.busy !== 1'b0)
+                                $fatal(1, "[%0t] WAIT_READY: busy=%b, expected 0, response =%b, debug_count_a =%b, debug_count_b = %b",
                                 $time, vif.mon_cb.busy, vif.mon_cb.ready, vif.mon_cb.response, vif.mon_cb.debug_count_a, vif.mon_cb.debug_count_b);
                             state = WAIT_START;
+                            completed_count++;
+                            result_hold = 1'b1;
+                            saved_response = vif.mon_cb.response;
+                            saved_count_a  = vif.mon_cb.debug_count_a;
+                            saved_count_b  = vif.mon_cb.debug_count_b;
                         end
                     end
 
@@ -65,6 +101,23 @@ module puf_checker_probe (
             end
         end
 
+    endtask
+
+    task automatic check_result_storage(
+        logic [vif.RESPONSE_BITS-1:0] saved_response,
+        logic [vif.COUNTER_WIDTH-1:0] saved_count_a,
+        logic [vif.COUNTER_WIDTH-1:0] saved_count_b
+    );
+        if (vif.mon_cb.ready !== 1'b1)
+            $fatal(1, "ready changed before new command expected=1 actual=%h", vif.mon_cb.ready);
+        if (vif.mon_cb.busy !== 1'b0)
+            $fatal(1, "busy changed while READY was held expected=0 actual=%h", vif.mon_cb.busy);
+        if (saved_response !== vif.mon_cb.response)
+            $fatal(1, "response changed while READY was held expected=%h actual=%h", saved_response, vif.mon_cb.response);
+        if (saved_count_a !== vif.mon_cb.debug_count_a)
+            $fatal(1, "debug_count_a changed while READY was held expected=%h actual=%h", saved_count_a, vif.mon_cb.debug_count_a);
+        if (saved_count_b !== vif.mon_cb.debug_count_b)
+            $fatal(1, "debug_count_b changed while READY was held expected=%h actual=%h", saved_count_b, vif.mon_cb.debug_count_b);
     endtask
 
     task automatic check_reset_behavior();

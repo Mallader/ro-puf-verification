@@ -2,7 +2,7 @@
 # run.do — GUI-запуск SystemVerilog testbench в QuestaSim
 #
 # Запуск из Transcript:
-#   cd C:/work/yadro/PUF_verification/tb/sim
+#   cd C:/work/PUF_verification/tb/sim
 #   do run.do
 # ============================================================
 
@@ -21,7 +21,7 @@ set SRC_FILES [list \
     ../top/puf_driver_probe.sv \
     ../top/puf_monitor_probe.sv \
     ../interfaces/puf_core_if.sv \
-    ../top/puf_core_if_modport_tb.sv \
+    ../top/puf_core_if_tb.sv \
 ]
 
 set WORK_LIB work
