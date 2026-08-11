@@ -12,10 +12,10 @@ Z0 !s99 nomlopt
 cModel Technology
 Z1 dC:/work/PUF_verification/tb/sim
 T_opt
-Z2 !s110 1786350597
-VZQZPK8iIO2kfgP1nzBec=2
+Z2 !s110 1786449597
+V4>zYKMz@aaEJOT<0SLCn13
 04 22 4 work puf_core_if_modport_tb fast 0
-=1-60ff9ee2cc56-6a798c05-20a-24cc
+=1-60ff9ee2cc56-6a7b0ebd-2bf-3f44
 R0
 !s12f OEM100
 !s12b OEM100
@@ -27,7 +27,7 @@ OL;O;2024.1;79
 vpuf_checker_probe
 2../top/puf_checker_probe.sv
 Z4 DXx6 sv_std 3 std 0 22 9oUSJO;AeEaW`l:M@^WG92
-Z5 !s110 1786350596
+Z5 !s110 1786449596
 !i10b 1
 !s100 BfbKTTla^WH;AX_c<g1711
 Io0c;UeJ]`21nVUO1AZ=W52
@@ -43,7 +43,7 @@ Z7 OL;L;2024.1;79
 r1
 !s85 0
 31
-Z8 !s108 1786350596.000000
+Z8 !s108 1786449596.000000
 !s107 ../top/puf_checker_probe.sv|
 !s90 -reportprogress|300|-work|work|-sv|../top/puf_checker_probe.sv|
 !i113 0
@@ -75,17 +75,17 @@ R8
 R9
 R3
 vpuf_core_if_modport_tb
-2../top/puf_core_if_modport_tb.sv
+2../top/puf_core_if_tb.sv
 R4
 R2
 !i10b 1
 !s100 lUz`SG9Omcg]41QNkh2SM0
-IXdf^RGnR?jfFTCdNIJ[`N3
+INFlHWlDJTKP7@M^6ncL>e0
 S1
 R1
 w1785942769
-8../top/puf_core_if_modport_tb.sv
-F../top/puf_core_if_modport_tb.sv
+8../top/puf_core_if_tb.sv
+F../top/puf_core_if_tb.sv
 !i122 5
 L0 4 36
 R6
@@ -93,9 +93,9 @@ R7
 r1
 !s85 0
 31
-!s108 1786350597.000000
-!s107 ../top/puf_core_if_modport_tb.sv|
-!s90 -reportprogress|300|-work|work|-sv|../top/puf_core_if_modport_tb.sv|
+!s108 1786449597.000000
+!s107 ../top/puf_core_if_tb.sv|
+!s90 -reportprogress|300|-work|work|-sv|../top/puf_core_if_tb.sv|
 !i113 0
 R9
 R3
@@ -104,15 +104,15 @@ vpuf_core_model
 R4
 R5
 !i10b 1
-!s100 _Vd1P085jzz?ZYPi8ShR52
-ITCLW::KANoam[Lc5Ef<Vg2
+!s100 n_;1?`]IaAl_NcTO8fiJ_3
+InL3aOPkZzR^HUT?75^FS92
 S1
 R1
-w1786350549
+w1786449573
 8../top/puf_core_model.sv
 F../top/puf_core_model.sv
 !i122 1
-L0 4 31
+L0 4 34
 R6
 R7
 r1

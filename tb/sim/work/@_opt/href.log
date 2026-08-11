@@ -1,11 +1,11 @@
 BEGIN 3:puf_core_if:fast__1:work
+    ready :  1:puf_core_model:fast:work 1:puf_checker_probe:fast:work
+    debug_count_b :  1:puf_core_model:fast:work 1:puf_checker_probe:fast:work
+    clk27 :  1:puf_driver_probe:fast:work 1:puf_monitor_probe:fast:work 1:puf_core_model:fast:work 1:puf_checker_probe:fast:work
+    busy :  1:puf_core_model:fast:work 1:puf_checker_probe:fast:work
+    debug_count_a :  1:puf_core_model:fast:work 1:puf_checker_probe:fast:work
     challenge :  1:puf_core_model:fast:work
-    response :  1:puf_checker_probe:fast:work 1:puf_core_model:fast:work
+    response :  1:puf_core_model:fast:work 1:puf_checker_probe:fast:work
     start :  1:puf_core_model:fast:work
-    rst_n :  1:puf_checker_probe:fast:work 1:puf_core_model:fast:work 1:puf_driver_probe:fast:work
-    ready :  1:puf_checker_probe:fast:work 1:puf_core_model:fast:work
-    debug_count_b :  1:puf_checker_probe:fast:work 1:puf_core_model:fast:work
-    clk27 :  1:puf_monitor_probe:fast:work 1:puf_checker_probe:fast:work 1:puf_core_model:fast:work 1:puf_driver_probe:fast:work
-    busy :  1:puf_checker_probe:fast:work 1:puf_core_model:fast:work
-    debug_count_a :  1:puf_checker_probe:fast:work 1:puf_core_model:fast:work
+    rst_n :  1:puf_driver_probe:fast:work 1:puf_core_model:fast:work 1:puf_checker_probe:fast:work
 END 
