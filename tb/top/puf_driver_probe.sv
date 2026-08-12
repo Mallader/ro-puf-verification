@@ -16,21 +16,15 @@ module puf_driver_probe  (
     int unsigned cycles_waited = 0;
 
     task automatic apply_reset(int unsigned hold_cycles);
-        @(negedge vif.clk27);
-        #1;
         vif.rst_n = 1'b0;
-        repeat (hold_cycles) @(posedge vif.clk27);
-        @(negedge vif.clk27);
-        #1;
+        repeat (hold_cycles) @(vif.drv_cb);
         vif.rst_n = 1'b1;
-        @(posedge vif.clk27);
     endtask
 
-    task automatic send_start(logic [vif.CHALLENGE_WIDTH-1:0] challenge);
-        @(posedge vif.clk27);
+    task automatic send_start(logic [vif.CHALLENGE_WIDTH-1:0] challenge, int unsigned hold_cycles);
         vif.drv_cb.challenge <= challenge;
         vif.drv_cb.start     <= 1'b1;
-        @(posedge vif.clk27);
+        repeat (hold_cycles) @(vif.drv_cb);
         vif.drv_cb.start     <= 1'b0;
     endtask
 
@@ -41,19 +35,15 @@ module puf_driver_probe  (
     );
         success = 0;
         cycles_waited = 0;
-
-        if (vif.drv_cb.busy === 1'b1) begin
-            success = 1;
-            return;
-        end
         
         for (int unsigned i = 0; i < timeout_cycles; i++) begin
-            @(posedge vif.clk27);
-            cycles_waited++;
-
             if (vif.drv_cb.busy === 1'b1) begin
                 success = 1;
                 break;
+            end
+            else begin 
+                @(vif.drv_cb);
+                cycles_waited++;
             end
        end
     endtask
@@ -65,29 +55,25 @@ module puf_driver_probe  (
     );
         success = 0;
         cycles_waited = 0;
-
-        if (vif.drv_cb.ready === 1'b1) begin
-            success = 1;
-            return;
-        end
         
         for (int unsigned i = 0; i < timeout_cycles; i++) begin
-            @(posedge vif.clk27);
-            cycles_waited++;
-
             if (vif.drv_cb.ready === 1'b1) begin
                 success = 1;
                 break;
+            end
+            else begin 
+                @(vif.drv_cb);
+                cycles_waited++;
             end
        end
     endtask
 
     initial begin
-        //обычная операция
+    //короткий start во время busy
         vif.drv_cb.start     <= 0;
         vif.drv_cb.challenge <= 0;
         apply_reset(2);
-        send_start(CHALLENGE_1);
+        send_start(CHALLENGE_1, 1);
 
         wait_for_busy(BUSY_TIMEOUT_CYCLES, success, cycles_waited);
         if (!success)
@@ -96,7 +82,9 @@ module puf_driver_probe  (
                 cycles_waited
             );
 
-        $display("BUSY detected");
+        $display("first BUSY detected");
+
+        send_start(CHALLENGE_2, 1);
 
         wait_for_ready(READY_TIMEOUT_CYCLES, success, cycles_waited);
         if (!success)
@@ -106,14 +94,14 @@ module puf_driver_probe  (
             );
 
         $display(
-            "READY detected after %0d cycles",
+            "first READY detected after %0d cycles",
             cycles_waited
         );
 
-        repeat (READY_HOLD_CYCLES) @(posedge vif.clk27);
+        repeat (READY_HOLD_CYCLES) @(vif.drv_cb);
 
-        //обычная операция
-        send_start(CHALLENGE_2);
+    //удерживаемый start
+        send_start(CHALLENGE_1, 1);
 
         wait_for_busy(BUSY_TIMEOUT_CYCLES, success, cycles_waited);
         if (!success)
@@ -122,7 +110,10 @@ module puf_driver_probe  (
                 cycles_waited
             );
 
-        $display("BUSY detected");
+        $display("second BUSY detected");
+
+        vif.drv_cb.challenge <= CHALLENGE_2;
+        vif.drv_cb.start     <= 1'b1;
 
         wait_for_ready(READY_TIMEOUT_CYCLES, success, cycles_waited);
         if (!success)
@@ -132,7 +123,31 @@ module puf_driver_probe  (
             );
 
         $display(
-            "READY detected after %0d cycles",
+            "second READY detected after %0d cycles",
+            cycles_waited
+        );
+
+        @(vif.drv_cb);
+        vif.drv_cb.start <= 1'b0;
+
+        wait_for_busy(BUSY_TIMEOUT_CYCLES, success, cycles_waited);
+        if (!success)
+            $fatal(1,
+                "BUSY TIMEOUT after %0d cycles",
+                cycles_waited
+            );
+
+        $display("third BUSY detected");
+
+        wait_for_ready(READY_TIMEOUT_CYCLES, success, cycles_waited);
+        if (!success)
+            $fatal(1,
+                "READY TIMEOUT after %0d cycles",
+                cycles_waited
+            );
+
+        $display(
+            "third READY detected after %0d cycles",
             cycles_waited
         );
     end

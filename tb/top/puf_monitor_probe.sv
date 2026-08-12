@@ -6,7 +6,7 @@ module puf_monitor_probe (
 );
     initial begin
         forever begin
-            @(posedge vif.clk27);
+            @(vif.mon_cb);
                 $display(
                     "time=%0t rst_n=%0b start=%0b challenge=%0b busy=%0b ready=%0b",
                     $time,

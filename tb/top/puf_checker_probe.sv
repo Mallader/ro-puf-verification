@@ -39,10 +39,10 @@ module puf_checker_probe (
         logic                         result_hold;
 
         forever begin
-            @(posedge vif.clk27 or negedge vif.rst_n);
+            @(vif.mon_cb or negedge vif.rst_n);
 
-            if (completed_count == 2) begin
-                if (accepted_count != 2)
+            if (completed_count == 3) begin
+                if (accepted_count != 3)
                     $fatal(1,
                         "Wrong operation count: accepted=%0d completed=%0d",
                         accepted_count, completed_count
@@ -85,13 +85,19 @@ module puf_checker_probe (
                         if (vif.mon_cb.ready  === 1'b1) begin
                             if (vif.mon_cb.busy !== 1'b0)
                                 $fatal(1, "[%0t] WAIT_READY: busy=%b, expected 0, response =%b, debug_count_a =%b, debug_count_b = %b",
-                                $time, vif.mon_cb.busy, vif.mon_cb.ready, vif.mon_cb.response, vif.mon_cb.debug_count_a, vif.mon_cb.debug_count_b);
-                            state = WAIT_START;
+                                $time, vif.mon_cb.busy, vif.mon_cb.response, vif.mon_cb.debug_count_a, vif.mon_cb.debug_count_b);
                             completed_count++;
                             result_hold = 1'b1;
                             saved_response = vif.mon_cb.response;
                             saved_count_a  = vif.mon_cb.debug_count_a;
                             saved_count_b  = vif.mon_cb.debug_count_b;
+                            if (vif.mon_cb.start === 1'b1 && vif.mon_cb.busy === 1'b0) begin
+                                state = WAIT_BUSY;
+                                accepted_count++;
+                                result_hold = 1'b0;
+                            end
+                            else
+                                state = WAIT_START;
                         end
                     end
 
@@ -132,11 +138,6 @@ module puf_checker_probe (
 
                 if (vif.rst_n === 1'b0)
                     check_reset_values("while reset is held");
-            end
-
-            repeat (3) begin
-                @(posedge vif.clk27);
-                check_reset_values("idle after reset release");
             end
         end
     endtask
