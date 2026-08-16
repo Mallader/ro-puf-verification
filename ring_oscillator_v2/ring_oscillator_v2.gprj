@@ -1,0 +1,24 @@
+<?xml version="1" encoding="UTF-8"?>
+<!DOCTYPE gowin-fpga-project>
+<Project>
+    <Template>FPGA</Template>
+    <Version>5</Version>
+    <Device name="GW1NR-9C" pn="GW1NR-LV9QN88PC6/I5">gw1nr9c-004</Device>
+    <FileList>
+        <File path="src/cdc_sync.sv" type="file.verilog" enable="1"/>
+        <File path="src/challenge_mapper.sv" type="file.verilog" enable="1"/>
+        <File path="src/frequency_meter.sv" type="file.verilog" enable="1"/>
+        <File path="src/gate_timer.sv" type="file.verilog" enable="1"/>
+        <File path="src/puf_core.sv" type="file.verilog" enable="1"/>
+        <File path="src/puf_fsm.sv" type="file.verilog" enable="1"/>
+        <File path="src/puf_peripheral.sv" type="file.verilog" enable="1"/>
+        <File path="src/response_builder.sv" type="file.verilog" enable="1"/>
+        <File path="src/ring_oscillator.sv" type="file.verilog" enable="1"/>
+        <File path="src/ro_array.sv" type="file.verilog" enable="1"/>
+        <File path="src/ro_counter.sv" type="file.verilog" enable="1"/>
+        <File path="src/ro_pair_measure .sv" type="file.verilog" enable="1"/>
+        <File path="src/snapshot.sv" type="file.verilog" enable="1"/>
+        <File path="src/top.sv" type="file.verilog" enable="1"/>
+        <File path="src/ring_oscillator_v2.cst" type="file.cst" enable="1"/>
+    </FileList>
+</Project>
