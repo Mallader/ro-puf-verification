@@ -5,6 +5,7 @@ module ro_array_sim_model_tb;
 
     localparam int NUM_RO      = 4;
     localparam MAX_TEST_CYCLES = 50;
+    localparam time HALF_PERIODS [0:NUM_RO-1]= '{4ns, 5ns, 6ns, 7ns};
 
     logic [NUM_RO-1:0] ro_clk;
 
@@ -13,7 +14,7 @@ module ro_array_sim_model_tb;
     always #5 clk27 = ~clk27;
 
 
-    ro_array_sim_model #(.NUM_RO(NUM_RO)) ro_array_sim (
+    ro_array_sim_model #(.NUM_RO(NUM_RO), .HALF_PERIODS(HALF_PERIODS)) ro_array_sim (
         .ro_clk(ro_clk)
     );
 
@@ -24,10 +25,10 @@ module ro_array_sim_model_tb;
     initial begin
         fork
             fork
-                measure_ro(0, 8);
-                measure_ro(1, 10);
-                measure_ro(2, 12);
-                measure_ro(3, 14);
+                measure_ro(0, HALF_PERIODS[0]);
+                measure_ro(1, HALF_PERIODS[1]);
+                measure_ro(2, HALF_PERIODS[2]);
+                measure_ro(3, HALF_PERIODS[3]);
             join
             begin
                 repeat (MAX_TEST_CYCLES) @(posedge clk27);
@@ -39,10 +40,11 @@ module ro_array_sim_model_tb;
         $finish;
     end
 
-    task automatic measure_ro(int ro_index, time period);
+    task automatic measure_ro(int ro_index, time half_period);
         time current_time    = 0;
         time previous_time   = 0;
         time measured_period [0:3] = '{0, 0, 0, 0};
+        time period = half_period * 2;
 
         for (int i = 0; i < 4; i++) begin
             @(posedge ro_clk[ro_index]);
