@@ -3,7 +3,7 @@ timeprecision 1ps;
 
 module ro_array_sim_model #(
     parameter int NUM_RO = 4,
-    parameter time HALF_PERIODS [0:NUM_RO-1]= '{default:5ns}
+    parameter realtime HALF_PERIODS [0:NUM_RO-1]= '{default:5ns}
 )(
     output wire [NUM_RO-1:0] ro_clk
 );
@@ -23,7 +23,7 @@ module ro_array_sim_model #(
 endmodule
 
 module ring_oscillator #(
-    parameter time HALF_PERIOD = 5ns
+    parameter realtime HALF_PERIOD = 5ns
 )(
     output logic ro_clk
 );
