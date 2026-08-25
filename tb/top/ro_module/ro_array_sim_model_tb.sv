@@ -1,7 +1,7 @@
 timeunit 1ns;
 timeprecision 1ps;
 
-module ro_array_sim_model_tb #(parameter int PROFILE = 0);
+module ro_array_sim_model_tb #(parameter int PROFILE = 1);
 
     localparam int NUM_RO           = 4;
     localparam int MAX_TEST_CYCLES  = 50;
@@ -32,6 +32,32 @@ module ro_array_sim_model_tb #(parameter int PROFILE = 0);
 
     initial begin  
 
+        fork : test
+
+            begin : measurements
+                for (int i = 0; i < NUM_RO; i++) begin
+                    automatic int idx = i;
+                    fork
+                        measure_ro(idx, HALF_PERIODS[idx]);
+                    join_none
+                end
+                wait fork;
+            end : measurements
+
+            begin : timeout
+                repeat (MAX_TEST_CYCLES) @(posedge clk27);
+                $fatal(1, "TEST TIMEOUT");
+            end : timeout
+
+        join_any : test
+
+        disable test;
+
+        $display("RO ARRAY SIM MODEL TEST PASSED");
+        $finish;
+    end
+
+    initial begin
         if (PROFILE == PROFILE_NORMAL)
             $display("RO PROFILE: NORMAL");
         else if (PROFILE == PROFILE_TIE_LAST)
@@ -41,26 +67,9 @@ module ro_array_sim_model_tb #(parameter int PROFILE = 0);
         else
             $fatal(1, "Unsupported RO PROFILE: %0d", PROFILE);
 
-        fork : test
-            begin : measurements
-                for (int i = 0; i < NUM_RO; i++) begin
-                    automatic int idx = i;
-                    fork
-                        measure_ro(idx, HALF_PERIODS[idx]);
-                    join_none
-                end
-                wait fork;
-            end
-            begin : timeout
-                repeat (MAX_TEST_CYCLES) @(posedge clk27);
-                $fatal(1, "TEST TIMEOUT");
-            end
-        join_any
-
-        disable test;
-
-        $display("RO ARRAY SIM MODEL TEST PASSED");
-        $finish;
+        check_prediction(0,1,1'b1);
+        check_prediction(1,0,1'b0);
+        check_prediction(2,3,1'b0);
     end
 
     task automatic measure_ro(input int ro_index, realtime half_period);
@@ -85,6 +94,21 @@ module ro_array_sim_model_tb #(parameter int PROFILE = 0);
 
     endtask
 
+    task automatic check_prediction(
+        int ro_a_index,
+        int ro_b_index,
+        bit expected_result
+    );
+        bit predicted_result;
+
+        predicted_result = predict_pair(ro_a_index, ro_b_index);
+
+        if (predicted_result !== expected_result)
+            $fatal(1, "pair RO%0d and RO%0d: expected_result = %0d, predicted_result = %0d", ro_a_index, ro_b_index, expected_result, predicted_result);
+
+        $display("pair RO%0d and RO%0d: result = %0d, PASS", ro_a_index, ro_b_index, predicted_result);
+    endtask
+
     function automatic bit realtime_equal(
         realtime a,
         realtime b,
@@ -98,6 +122,21 @@ module ro_array_sim_model_tb #(parameter int PROFILE = 0);
             diff = -diff;
 
         return diff <= tolerance;
+    endfunction
+
+    function automatic bit predict_pair (int ro_a_index, int ro_b_index);
+        if ((0 > ro_a_index) || (ro_a_index >= NUM_RO) ||
+            (0 > ro_b_index) || (ro_b_index >= NUM_RO))
+            $fatal (1, "RO index out of range: a=%0d, b=%0d, valid range=0..%0d",
+                    ro_a_index, ro_b_index, NUM_RO-1);
+
+        if (ro_a_index == ro_b_index)
+            $fatal(1, "RO cannot be compared with itself: RO%0d", ro_a_index);
+        
+        if (HALF_PERIODS[ro_a_index] < HALF_PERIODS[ro_b_index])
+            return 1;
+        else
+            return 0;
     endfunction
 
 endmodule
