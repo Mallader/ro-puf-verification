@@ -15,11 +15,10 @@ transcript on
 set TOP ro_pair_measure_tb
 
 set TEST_PROFILES [list \
-    [list NORMAL     0] \
-    [list TIE_LAST   1] \
-    [list CLOSE      2] \
-    [list STOPPED    3] \
-]
+    [list EXTREME_FAST_SLOW 4 3 2] \
+    [list EXTREME_SLOW_FAST 4 2 3] \
+    [list NORMAL            0 3 2] \
+  ]
 
 set SCRIPT_FILE [file normalize [info script]]
 
@@ -99,7 +98,7 @@ foreach src $SRC_FILES {
 # -------------------- ЗАПУСК ПРОФИЛЕЙ -------------------------
 
 foreach test_profile $TEST_PROFILES {
-    lassign $test_profile profile_name profile_value
+    lassign $test_profile profile_name profile_value ro_a_index ro_b_index
 
     catch {quit -sim}
 
@@ -111,9 +110,12 @@ foreach test_profile $TEST_PROFILES {
     # $finish завершает тест, но окно Questa остаётся открытым.
     # +acc сохраняет доступ к внутренним сигналам для Wave.
     vsim -lib $WORK_LIB_PATH \
+         -wlfdeleteonquit \
          -onfinish stop \
          -voptargs=+acc \
          -gPROFILE=$profile_value \
+         -gRO_A_INDEX=$ro_a_index \
+         -gRO_B_INDEX=$ro_b_index \
          $TOP
 
     if {$ADD_ALL_WAVES} {

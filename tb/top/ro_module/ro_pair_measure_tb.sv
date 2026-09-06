@@ -1,19 +1,25 @@
 timeunit 1ns;
 timeprecision 1ps;
 
-module ro_pair_measure_tb #(parameter int PROFILE = 0);
+module ro_pair_measure_tb #(
+    parameter int PROFILE    = 0,
+    parameter int RO_A_INDEX = 3,
+    parameter int RO_B_INDEX = 2
+    );
 
     localparam int NUM_RO           = 4;
     localparam int PROFILE_NORMAL   = 0;
     localparam int PROFILE_TIE_LAST = 1;
     localparam int PROFILE_CLOSE    = 2;
     localparam int PROFILE_STOPPED  = 3;
+    localparam int PROFILE_EXTREME  = 4;
     localparam int COUNTER_WIDTH    = 16;
     localparam int WINDOW_CYCLES    = 100;
 
     localparam realtime HALF_PERIODS [NUM_RO] =
-        (PROFILE == PROFILE_NORMAL)   ? '{4ns, 5ns, 6ns, 7ns}   :
-        (PROFILE == PROFILE_TIE_LAST) ? '{4ns, 5ns, 7ns, 7ns}   :
+        (PROFILE == PROFILE_NORMAL)   ? '{4ns, 5ns, 6ns, 7ns}     :
+        (PROFILE == PROFILE_TIE_LAST) ? '{4ns, 5ns, 7ns, 7ns}     :
+        (PROFILE == PROFILE_EXTREME)  ? '{4ns, 5ns, 20ns, 2ns}    :
         (PROFILE == PROFILE_CLOSE)    ? '{4ns, 5ns, 6.2ns, 6.0ns} :
                                         '{4ns, 5ns, 6ns, 7ns};
 
@@ -34,6 +40,8 @@ module ro_pair_measure_tb #(parameter int PROFILE = 0);
             $display("RO PROFILE: CLOSE");
         else if (PROFILE == PROFILE_STOPPED)
             $display("RO PROFILE: STOPPED");
+        else if (PROFILE == PROFILE_EXTREME)
+            $display("RO PROFILE: EXTREME");
         else
             $fatal(1, "Unsupported RO PROFILE: %0d", PROFILE);
     end
@@ -44,8 +52,8 @@ module ro_pair_measure_tb #(parameter int PROFILE = 0);
         .WINDOW_CYCLES   (WINDOW_CYCLES),
         .HALF_PERIODS    (HALF_PERIODS),
         .ENABLED         (ENABLED),
-        .RO_A_INDEX      (NUM_RO - 1),
-        .RO_B_INDEX      (NUM_RO - 2)
+        .RO_A_INDEX      (RO_A_INDEX),
+        .RO_B_INDEX      (RO_B_INDEX)
      ) ro_pair_measure_if (
         .clk27(clk27)
     );

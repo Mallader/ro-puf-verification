@@ -63,6 +63,8 @@ module ro_module_checker #(
             if (vif.mon_cb.done === 1'b1) begin
                 if ($isunknown({vif.mon_cb.count_a, vif.mon_cb.count_b, vif.mon_cb.puf_bit, vif.mon_cb.tie}))
                     $fatal(1, "DUT result contains X/Z");
+                if ((vif.mon_cb.count_a == 0) || (vif.mon_cb.count_b == 0))
+                    $fatal(1, "Zero counter: count_a=%0d, count_b=%0d", vif.mon_cb.count_a, vif.mon_cb.count_b);
 
                 if (vif.mon_cb.count_a > vif.mon_cb.count_b)
                     observed_count_relation = 1;
