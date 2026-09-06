@@ -7,29 +7,42 @@ module ro_module_checker #(
     ro_pair_measure_if.checker_mp vif
 );
 
-    localparam int MAX_TEST_CYCLES = 200;
-
-    initial begin
-        if (PROFILE == vif.PROFILE_NORMAL)
-            $display("RO PROFILE: NORMAL");
-        else if (PROFILE == vif.PROFILE_TIE_LAST)
-            $display("RO PROFILE: TIE_LAST");
-        else if (PROFILE == vif.PROFILE_CLOSE)
-            $display("RO PROFILE: CLOSE");
-        else
-            $fatal(1, "Unsupported RO PROFILE: %0d", PROFILE);
-    end
+    localparam int unsigned MAX_TEST_CYCLES = 300;
     
     initial begin
-        fork
-            measure_and_check(vif.RO_A_INDEX, vif.RO_B_INDEX);
-            begin
-                repeat (MAX_TEST_CYCLES) @(posedge vif.clk27);
-                $fatal(1, "TEST TIMEOUT");
-            end
-        join_any
+        if (PROFILE == 3) begin
+            static bit busy_seen = 0;
+            repeat (MAX_TEST_CYCLES) begin
+                @(vif.mon_cb);
 
-        disable fork;
+                if (vif.mon_cb.done === 1'b1)
+                    $fatal(1, "done appeared");
+
+                if (!busy_seen) begin
+                    if (vif.mon_cb.busy === 1'b1)
+                        busy_seen = 1;
+                end
+                else if (vif.mon_cb.busy !== 1'b1) begin
+                    $fatal(1, "busy dropped");
+                end
+            end
+
+            if (!busy_seen)
+                $fatal(1, "busy was never asserted");
+
+            $display("EXPECTED TIMEOUT - PASS");
+            $finish;
+        end else begin
+            fork
+                measure_and_check(vif.RO_A_INDEX, vif.RO_B_INDEX);
+                begin
+                    repeat (MAX_TEST_CYCLES) @(vif.mon_cb);
+                    $fatal(1, "TEST TIMEOUT");
+                end
+            join_any
+
+            disable fork;
+        end
     end
 
     task automatic measure_and_check (int ro_a_index, int ro_b_index);
@@ -86,4 +99,4 @@ module ro_module_checker #(
         predicted_result = (vif.HALF_PERIODS[ro_a_index] < vif.HALF_PERIODS[ro_b_index]);
     endfunction
 
-endmodule
+endmodule: ro_module_checker

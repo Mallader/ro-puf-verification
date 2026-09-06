@@ -139,4 +139,4 @@ module ro_array_sim_model_tb #(parameter int PROFILE = 1);
             return 0;
     endfunction
 
-endmodule
+endmodule: ro_array_sim_model_tb

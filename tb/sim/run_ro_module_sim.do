@@ -15,9 +15,10 @@ transcript on
 set TOP ro_pair_measure_tb
 
 set TEST_PROFILES [list \
-    [list NORMAL   0] \
-    [list TIE_LAST 1] \
-    [list CLOSE    2] \
+    [list NORMAL     0] \
+    [list TIE_LAST   1] \
+    [list CLOSE      2] \
+    [list STOPPED    3] \
 ]
 
 set SCRIPT_FILE [file normalize [info script]]
@@ -120,11 +121,17 @@ foreach test_profile $TEST_PROFILES {
         radix hexadecimal
     }
 
-    set errors_before_run $error_count
     run -all
 
-    if {$error_count > $errors_before_run} {
-        error "Profile $profile_name failed; see the Questa transcript above."
+    # A successful testbench path ends via $finish.  Runtime failures such as
+    # $fatal also stop the simulator, but runStatus reports a different reason.
+    set run_status [runStatus -full]
+    set expected_run_status {break simulation_stop {$finish}}
+
+    catch {quit -sim}
+
+    if {$run_status ne $expected_run_status} {
+        error "Profile $profile_name failed with simulator status '$run_status'; see the Questa transcript above."
     }
 
     puts "Profile $profile_name PASSED"
@@ -133,8 +140,5 @@ foreach test_profile $TEST_PROFILES {
 puts ""
 puts "============================================================"
 puts "All requested profiles PASSED: $TOP"
-puts "The last profile remains loaded because -onfinish stop is enabled."
-puts "To rerun the last profile without recompilation:"
-puts "  restart -f"
-puts "  run -all"
+puts "Each profile was unloaded after its result was checked."
 puts "============================================================"

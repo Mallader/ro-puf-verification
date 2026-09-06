@@ -30,9 +30,10 @@ module dut_wrapper (
 
     ro_array_sim_model #(
         .NUM_RO      (vif.NUM_RO),
-        .HALF_PERIODS(vif.HALF_PERIODS)
+        .HALF_PERIODS(vif.HALF_PERIODS),
+        .ENABLED     (vif.ENABLED)
      ) ro_array_sim_model (
         .ro_clk(ro_clk)
     );
 
-endmodule
+endmodule: dut_wrapper

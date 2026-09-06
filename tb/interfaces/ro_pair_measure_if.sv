@@ -3,12 +3,10 @@ timeprecision 1ps;
 
 interface ro_pair_measure_if #(
     parameter int      NUM_RO                    = 4,
-    parameter int      PROFILE_NORMAL            = 0,
-    parameter int      PROFILE_TIE_LAST          = 1,
-    parameter int      PROFILE_CLOSE             = 2,
     parameter int      COUNTER_WIDTH             = 16,
     parameter int      WINDOW_CYCLES             = 100,
     parameter realtime HALF_PERIODS [0:NUM_RO-1] = '{default:5ns},
+    parameter bit      ENABLED [0:NUM_RO-1]      = '{default:1'b1},
     parameter int      RO_A_INDEX                = NUM_RO - 1,
     parameter int      RO_B_INDEX                = NUM_RO - 2
 ) (
@@ -74,4 +72,4 @@ interface ro_pair_measure_if #(
         input count_b
     );
 
-endinterface
+endinterface: ro_pair_measure_if

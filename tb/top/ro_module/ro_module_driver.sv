@@ -5,10 +5,10 @@ module ro_module_driver  (
     ro_pair_measure_if.drv_mp vif
 );
 
-    localparam BUSY_TIMEOUT_CYCLES = 200;
-    localparam DONE_TIMEOUT_CYCLES = 200;
+    localparam int unsigned BUSY_TIMEOUT_CYCLES = 200;
+    localparam int unsigned DONE_TIMEOUT_CYCLES = 200;
 
-    localparam int DONE_HOLD_CYCLES = 3;
+    localparam int unsigned DONE_HOLD_CYCLES = 3;
 
     bit success = 0;
     int unsigned cycles_waited = 0;
@@ -81,17 +81,16 @@ module ro_module_driver  (
 
         wait_for_done(DONE_TIMEOUT_CYCLES, success, cycles_waited);
         if (!success)
-            $fatal(1,
+            $display(
                 "done TIMEOUT after %0d cycles",
                 cycles_waited
             );
-
-        $display(
+        else $display(
             "first done detected after %0d cycles",
             cycles_waited
-        );
+            );
 
         repeat (DONE_HOLD_CYCLES) @(vif.drv_cb);
     end
 
-endmodule
+endmodule: ro_module_driver
