@@ -1,0 +1,151 @@
+timeunit 1ns;
+timeprecision 1ps;
+
+module puf_core_driver  (
+    puf_core_if.drv_mp vif
+);
+    localparam logic [vif.CHALLENGE_WIDTH-1:0] CHALLENGE_1 = 'h3E9;
+    localparam logic [vif.CHALLENGE_WIDTH-1:0] CHALLENGE_2 = 'h310;
+    localparam logic [vif.CHALLENGE_WIDTH-1:0] CHALLENGE_3 = 'h1A0;
+
+    localparam BUSY_TIMEOUT_CYCLES  = 100;
+    localparam READY_TIMEOUT_CYCLES = 20000;
+
+    localparam int READY_HOLD_CYCLES = 3;
+
+    bit success = 0;
+    int unsigned cycles_waited = 0;
+
+    task automatic apply_reset(int unsigned hold_cycles);
+        vif.rst_n = 1'b0;
+        repeat (hold_cycles) @(vif.drv_cb);
+        vif.rst_n = 1'b1;
+    endtask
+
+    task automatic send_start(logic [vif.CHALLENGE_WIDTH-1:0] challenge, int unsigned hold_cycles);
+        vif.drv_cb.challenge <= challenge;
+        vif.drv_cb.start     <= 1'b1;
+        repeat (hold_cycles) @(vif.drv_cb);
+        vif.drv_cb.start     <= 1'b0;
+    endtask
+
+    task automatic wait_for_busy(
+        input  int unsigned timeout_cycles,
+        output bit          success,
+        output int unsigned cycles_waited
+    );
+        success = 0;
+        cycles_waited = 0;
+        
+        for (int unsigned i = 0; i < timeout_cycles; i++) begin
+            if (vif.drv_cb.busy === 1'b1) begin
+                success = 1;
+                break;
+            end
+            else begin 
+                @(vif.drv_cb);
+                cycles_waited++;
+            end
+       end
+    endtask
+
+    task automatic wait_for_ready(
+        input  int unsigned timeout_cycles,
+        output bit          success,
+        output int unsigned cycles_waited
+    );
+        success = 0;
+        cycles_waited = 0;
+        
+        for (int unsigned i = 0; i < timeout_cycles; i++) begin
+            if (vif.drv_cb.ready === 1'b1) begin
+                success = 1;
+                break;
+            end
+            else begin 
+                @(vif.drv_cb);
+                cycles_waited++;
+            end
+       end
+    endtask
+
+    initial begin
+    //стандартная операция 1
+        vif.drv_cb.start     <= 0;
+        vif.drv_cb.challenge <= 0;
+        apply_reset(2);
+        send_start(CHALLENGE_1, 1);
+
+        wait_for_busy(BUSY_TIMEOUT_CYCLES, success, cycles_waited);
+        if (!success)
+            $fatal(1,
+                "BUSY TIMEOUT after %0d cycles",
+                cycles_waited
+            );
+
+        $display("first BUSY detected");
+
+        wait_for_ready(READY_TIMEOUT_CYCLES, success, cycles_waited);
+        if (!success)
+            $fatal(1,
+                "READY TIMEOUT after %0d cycles",
+                cycles_waited
+            );
+
+        $display(
+            "first READY detected after %0d cycles",
+            cycles_waited
+        );
+
+        repeat (READY_HOLD_CYCLES) @(vif.drv_cb);
+
+    //стандартная операция 2
+        send_start(CHALLENGE_2, 1);
+
+        wait_for_busy(BUSY_TIMEOUT_CYCLES, success, cycles_waited);
+        if (!success)
+            $fatal(1,
+                "BUSY TIMEOUT after %0d cycles",
+                cycles_waited
+            );
+
+        $display("second BUSY detected");
+
+        wait_for_ready(READY_TIMEOUT_CYCLES, success, cycles_waited);
+        if (!success)
+            $fatal(1,
+                "READY TIMEOUT after %0d cycles",
+                cycles_waited
+            );
+
+        $display(
+            "second READY detected after %0d cycles",
+            cycles_waited
+        );
+
+    //стандартная операция 3
+        send_start(CHALLENGE_3, 1);
+
+        wait_for_busy(BUSY_TIMEOUT_CYCLES, success, cycles_waited);
+        if (!success)
+            $fatal(1,
+                "BUSY TIMEOUT after %0d cycles",
+                cycles_waited
+            );
+
+        $display("third BUSY detected");
+
+        wait_for_ready(READY_TIMEOUT_CYCLES, success, cycles_waited);
+        if (!success)
+            $fatal(1,
+                "READY TIMEOUT after %0d cycles",
+                cycles_waited
+            );
+
+        $display(
+            "third READY detected after %0d cycles",
+            cycles_waited
+        );
+    end
+
+endmodule: puf_core_driver

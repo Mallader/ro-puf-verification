@@ -2,9 +2,15 @@ timeunit 1ns;
 timeprecision 1ps;
 
 interface puf_core_if #(
-    parameter int unsigned CHALLENGE_WIDTH = 32,
-    parameter int unsigned RESPONSE_BITS   = 16,
-    parameter int unsigned COUNTER_WIDTH   = 32
+    parameter integer  NUM_RO                    = 8,
+    parameter integer  RESPONSE_BITS             = 16,
+    parameter integer  COUNTER_WIDTH             = 32,
+    parameter integer  WINDOW_CYCLES             = 270_000,
+    parameter integer  RO_SETTLE_CYCLES          = 16,
+    parameter integer  CHALLENGE_WIDTH           = 32,
+    parameter realtime HALF_PERIODS [0:NUM_RO-1] = '{default:5ns},
+    parameter bit      ENABLED [0:NUM_RO-1]      = '{default:1'b1},
+    parameter int      PROFILE                   = 0
 ) (
     input logic clk27
 );
@@ -25,13 +31,13 @@ interface puf_core_if #(
 
         output start, challenge;
         input  busy, ready;
-    endclocking
+    endclocking: drv_cb
 
     clocking mon_cb @(posedge clk27);
         default input #1step;
 
         input  rst_n, start, challenge, busy, ready, response, debug_count_a, debug_count_b;
-    endclocking
+    endclocking: mon_cb
 
     modport dut_mp (
         input  clk27,
@@ -72,4 +78,4 @@ interface puf_core_if #(
         input debug_count_b
     );
 
-endinterface
+endinterface: puf_core_if
