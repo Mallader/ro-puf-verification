@@ -3,6 +3,7 @@ work/
 *.wlf
 transcript
 vsim_stacktrace.vstf
+/tb/sim/.puf_core_proc_tmp_*/
 *.log
 *.vstf
 *.ucdb
