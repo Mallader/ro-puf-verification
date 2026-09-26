@@ -2,10 +2,14 @@ module top;
 
     import puf_pkg::*;
 
-    puf_transaction tr;
+    puf_transaction   tr;
+    puf_base_sequence seq;
+    puf_sequencer     sequencer;
 
     initial begin
-        tr = puf_transaction::type_id::create("tr");
+        tr        = puf_transaction::type_id::create("tr");
+        seq       = puf_base_sequence::type_id::create("seq");
+        sequencer = puf_sequencer::type_id::create("sequencer", null);
 
         repeat (20) begin
             if (!tr.randomize())
