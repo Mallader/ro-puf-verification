@@ -2,15 +2,17 @@ module top;
 
     import puf_pkg::*;
 
-    puf_transaction             tr;
-    puf_base_sequence           base_seq;
-    puf_sequencer               sequencer;
-    puf_single_measure_sequence single_meas_seq;
+    puf_transaction               tr;
+    puf_base_sequence             base_seq;
+    puf_sequencer                 sequencer;
+    puf_single_measure_sequence   single_meas_seq;
+    puf_random_challenge_sequence rand_chall_seq;
 
     initial begin
         tr              = puf_transaction::type_id::create("tr");
         base_seq        = puf_base_sequence::type_id::create("base_seq");
         single_meas_seq = puf_single_measure_sequence::type_id::create("single_meas_seq");
+        rand_chall_seq  = puf_random_challenge_sequence::type_id::create("rand_chall_seq");
         sequencer       = puf_sequencer::type_id::create("sequencer", null);
 
         repeat (20) begin

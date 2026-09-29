@@ -7,7 +7,6 @@ class puf_single_measure_sequence extends puf_base_sequence;
     endfunction
 
     virtual task body();
-
         puf_transaction req;
 
         req = puf_transaction::type_id::create("req");
@@ -19,7 +18,6 @@ class puf_single_measure_sequence extends puf_base_sequence;
         end
         
         finish_item(req);
-
     endtask: body
 
 endclass: puf_single_measure_sequence
