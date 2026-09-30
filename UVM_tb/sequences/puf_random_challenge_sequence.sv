@@ -12,7 +12,7 @@ class puf_random_challenge_sequence extends puf_base_sequence;
         for (int unsigned i = 0; i < num_items; i++) begin
             puf_transaction req;
 
-            req = puf_transaction::type_id::create($sformatf("req%0d", i));
+            req = puf_transaction::type_id::create($sformatf("req_%0d", i));
 
             start_item(req);
 
