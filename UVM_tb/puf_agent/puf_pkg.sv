@@ -14,5 +14,6 @@ package puf_pkg;
     `include "../sequences/puf_random_challenge_sequence.sv"
     `include "../sequences/puf_repeated_measure_sequence.sv"
     `include "../sequences/puf_boundary_challenge_sequence.sv"
+    `include "../sequences/puf_all_challenges_sequence.sv"
 
 endpackage: puf_pkg

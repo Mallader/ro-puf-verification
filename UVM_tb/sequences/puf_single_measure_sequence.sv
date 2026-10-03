@@ -8,15 +8,11 @@ class puf_single_measure_sequence extends puf_base_sequence;
 
     virtual task body();
         puf_transaction req;
-
         req = puf_transaction::type_id::create("req");
-
         start_item(req);
-
         if (!req.randomize()) begin
             `uvm_fatal("RANDFAIL", "puf_transaction randomization failed")
         end
-        
         finish_item(req);
     endtask: body
 
