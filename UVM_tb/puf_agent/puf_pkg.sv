@@ -6,8 +6,8 @@ package puf_pkg;
     parameter int unsigned CHALLENGE_WIDTH = 6;
 
     `include "puf_transaction.sv"
-
     `include "puf_sequencer.sv"
+    `include "puf_driver.sv"
     
     `include "../sequences/puf_base_sequence.sv"
     `include "../sequences/puf_single_measure_sequence.sv"
